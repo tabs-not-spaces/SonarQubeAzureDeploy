@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.17.1.54307",
-      "templateHash": "8456990811931727136"
+      "templateHash": "14591114556107882528"
     }
   },
   "parameters": {
@@ -73,7 +73,8 @@
       },
       "kind": "StorageV2",
       "properties": {
-        "accessTier": "Hot"
+        "accessTier": "Hot",
+        "supportsHttpsTrafficOnly": true
       }
     },
     {
@@ -104,6 +105,14 @@
       "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
       "apiVersion": "2022-09-01",
       "name": "[format('{0}/default/logs', parameters('storageAccountName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+      "apiVersion": "2022-09-01",
+      "name": "[format('{0}/default/caddy-data', parameters('storageAccountName'))]",
       "dependsOn": [
         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
       ]
@@ -200,11 +209,43 @@
                 {
                   "port": 9000,
                   "protocol": "TCP"
-                },
+                }
+              ]
+            }
+          },
+          {
+            "name": "caddy-container",
+            "properties": {
+              "image": "caddy:latest",
+              "volumeMounts": [
+                {
+                  "name": "caddy-data",
+                  "mountPath": "/data"
+                }
+              ],
+              "resources": {
+                "requests": {
+                  "cpu": 1,
+                  "memoryInGB": 1
+                }
+              },
+              "ports": [
                 {
                   "port": 80,
                   "protocol": "TCP"
+                },
+                {
+                  "port": 443,
+                  "protocol": "TCP"
                 }
+              ],
+              "command": [
+                "caddy",
+                "reverse-proxy",
+                "--from",
+                "[format('{0}.{1}.azurecontainer.io', parameters('dnsName'), parameters('location'))]",
+                "--to",
+                "localhost:9000"
               ]
             }
           }
@@ -216,7 +257,11 @@
           "ports": [
             {
               "protocol": "TCP",
-              "port": 9000
+              "port": 443
+            },
+            {
+              "port": 80,
+              "protocol": "TCP"
             }
           ]
         },
@@ -253,6 +298,15 @@
             "name": "logs",
             "azureFile": {
               "shareName": "logs",
+              "storageAccountName": "[parameters('storageAccountName')]",
+              "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-04-01').keys[0].value]",
+              "readOnly": false
+            }
+          },
+          {
+            "name": "caddy-data",
+            "azureFile": {
+              "shareName": "caddy-data",
               "storageAccountName": "[parameters('storageAccountName')]",
               "storageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2021-04-01').keys[0].value]",
               "readOnly": false

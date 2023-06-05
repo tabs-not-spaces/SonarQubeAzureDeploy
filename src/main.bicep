@@ -31,6 +31,7 @@ resource sonarqubeStorageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' 
   kind: 'StorageV2'
   properties:{
     accessTier: 'Hot'
+    supportsHttpsTrafficOnly: true
   }
 }
 
@@ -62,6 +63,13 @@ resource defaultLogsFileShare 'Microsoft.Storage/storageAccounts/fileServices/sh
   ]
 }
 
+
+resource caddyDataFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01' = {
+  name: '${storageAccountName}/default/caddy-data'
+  dependsOn: [
+    sonarqubeStorageAccount
+  ]
+}
 
 resource sonarqubeSqlServer 'Microsoft.Sql/servers@2022-08-01-preview' ={
   name: sqlServerName
@@ -147,11 +155,36 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2021-07
               port: 9000
               protocol: 'TCP'
             }
+          ]
+        }
+      }
+      {
+        name: 'caddy-container'
+        properties: {
+          image: 'caddy:latest'
+          volumeMounts: [
+            {
+              name: 'caddy-data'
+              mountPath: '/data'
+            }
+          ]
+          resources: {
+            requests: {
+              cpu: 1
+              memoryInGB: 1
+            }
+          }
+          ports: [
             {
               port: 80
               protocol: 'TCP'
             }
+            {
+              port: 443
+              protocol: 'TCP'
+            }
           ]
+          command:[ 'caddy', 'reverse-proxy', '--from', '${dnsName}.${location}.azurecontainer.io', '--to', 'localhost:9000' ]
         }
       }
     ]
@@ -162,7 +195,11 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2021-07
       ports: [
         {
           protocol: 'TCP'
-          port: 9000
+          port: 443
+        }
+        {
+          port: 80
+          protocol: 'TCP'
         }
       ]
     }
@@ -204,12 +241,20 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2021-07
           readOnly: false
         }
       }
+      {
+        name: 'caddy-data'
+        azureFile: {
+          shareName: 'caddy-data'
+          storageAccountName: storageAccountName
+          storageAccountKey: sonarqubeStorageAccount.listKeys().keys[0].value
+          readOnly: false
+        }
+      }
     ]
   }
   dependsOn:[
     sonarqubeSqlServer
   ]
 }
-
 
 
