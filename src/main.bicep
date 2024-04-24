@@ -22,77 +22,76 @@ param sqlServerAdminLogin string = 'sonar'
 @secure()
 param sqlServerAdminPassword string
 
-resource sonarqubeStorageAccount 'Microsoft.Storage/storageAccounts@2021-04-01' = {
+resource sonarqubeStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: storageAccountName
   location: location
   sku: {
     name: 'Standard_LRS'
   }
   kind: 'StorageV2'
-  properties:{
+  properties: {
     accessTier: 'Hot'
     supportsHttpsTrafficOnly: true
   }
 }
 
-resource defaultConfFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01' = {
+resource defaultConfFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
   name: '${storageAccountName}/default/conf'
   dependsOn: [
     sonarqubeStorageAccount
   ]
 }
 
-resource defaultDataFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01' = {
+resource defaultDataFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
   name: '${storageAccountName}/default/data'
   dependsOn: [
     sonarqubeStorageAccount
   ]
 }
 
-resource defaultExtensionsFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01' = {
+resource defaultExtensionsFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
   name: '${storageAccountName}/default/extensions'
   dependsOn: [
     sonarqubeStorageAccount
   ]
 }
 
-resource defaultLogsFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01' = {
+resource defaultLogsFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
   name: '${storageAccountName}/default/logs'
   dependsOn: [
     sonarqubeStorageAccount
   ]
 }
 
-
-resource caddyDataFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2022-09-01' = {
+resource caddyDataFileShare 'Microsoft.Storage/storageAccounts/fileServices/shares@2023-01-01' = {
   name: '${storageAccountName}/default/caddy-data'
   dependsOn: [
     sonarqubeStorageAccount
   ]
 }
 
-resource sonarqubeSqlServer 'Microsoft.Sql/servers@2022-08-01-preview' ={
+resource sonarqubeSqlServer 'Microsoft.Sql/servers@2023-08-01-preview' = {
   name: sqlServerName
   location: location
-  properties:{
+  properties: {
     administratorLogin: sqlServerAdminLogin
-    administratorLoginPassword:sqlServerAdminPassword
+    administratorLoginPassword: sqlServerAdminPassword
   }
 }
 
-resource firewallRule 'Microsoft.Sql/servers/firewallRules@2022-08-01-preview' ={
+resource firewallRule 'Microsoft.Sql/servers/firewallRules@2023-08-01-preview' = {
   name: 'AzureServices'
-  parent:sonarqubeSqlServer
+  parent: sonarqubeSqlServer
   properties: {
     startIpAddress: '0.0.0.0'
     endIpAddress: '0.0.0.0'
   }
 }
 
-resource sonarSqlDatabase 'Microsoft.Sql/servers/databases@2022-08-01-preview' = {
-  name:sqlDatabaseName
+resource sonarSqlDatabase 'Microsoft.Sql/servers/databases@2023-08-01-preview' = {
+  name: sqlDatabaseName
   location: location
-  parent:sonarqubeSqlServer
+  parent: sonarqubeSqlServer
   sku: {
     name: 'Basic'
     tier: 'Basic'
@@ -103,7 +102,7 @@ resource sonarSqlDatabase 'Microsoft.Sql/servers/databases@2022-08-01-preview' =
   }
 }
 
-resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2021-07-01' = {
+resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2023-05-01' = {
   name: containerInstanceName
   location: location
   properties: {
@@ -184,7 +183,14 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2021-07
               protocol: 'TCP'
             }
           ]
-          command:[ 'caddy', 'reverse-proxy', '--from', '${dnsName}.${location}.azurecontainer.io', '--to', 'localhost:9000' ]
+          command: [
+            'caddy'
+            'reverse-proxy'
+            '--from'
+            '${dnsName}.${location}.azurecontainer.io'
+            '--to'
+            'localhost:9000'
+          ]
         }
       }
     ]
@@ -252,9 +258,7 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2021-07
       }
     ]
   }
-  dependsOn:[
+  dependsOn: [
     sonarqubeSqlServer
   ]
 }
-
-
