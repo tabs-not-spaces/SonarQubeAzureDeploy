@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.170.59819",
-      "templateHash": "13669106648736504715"
+      "templateHash": "11600432622740004884"
     }
   },
   "parameters": {
@@ -32,6 +32,13 @@
       "defaultValue": "[format('sq{0}', substring(uniqueString(resourceGroup().id), 0, 8))]",
       "metadata": {
         "description": "DNS name for the SonarQube instance"
+      }
+    },
+    "hostName": {
+      "type": "string",
+      "defaultValue": "[format('{0}.{1}.azurecontainer.io', parameters('dnsName'), parameters('location'))]",
+      "metadata": {
+        "description": "Host name for the service"
       }
     },
     "sqlServerName": {
@@ -243,7 +250,7 @@
                 "caddy",
                 "reverse-proxy",
                 "--from",
-                "[format('{0}.{1}.azurecontainer.io', parameters('dnsName'), parameters('location'))]",
+                "[format('{0}', parameters('hostName'))]",
                 "--to",
                 "localhost:9000"
               ]

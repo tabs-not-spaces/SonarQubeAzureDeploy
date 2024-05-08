@@ -9,6 +9,9 @@ param containerInstanceName string = 'sq-container'
 @description('DNS name for the SonarQube instance')
 param dnsName string = 'sq${substring(uniqueString(resourceGroup().id), 0, 8)}'
 
+@description('Host name for the service')
+param hostName string = '${dnsName}.${location}.azurecontainer.io'
+
 @description('Azure SQL Server Name to use for SonarQube')
 param sqlServerName string = 'sqsvr${substring(uniqueString(resourceGroup().id), 0, 4)}'
 
@@ -187,7 +190,7 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2023-05
             'caddy'
             'reverse-proxy'
             '--from'
-            '${dnsName}.${location}.azurecontainer.io'
+            '${hostName}'
             '--to'
             'localhost:9000'
           ]
