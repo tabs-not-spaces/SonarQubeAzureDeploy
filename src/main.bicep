@@ -149,7 +149,7 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2023-05
           resources: {
             requests: {
               cpu: 2
-              memoryInGB: 8
+              memoryInGB: 4
             }
           }
           ports: [

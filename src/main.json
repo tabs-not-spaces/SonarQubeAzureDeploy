@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.26.170.59819",
-      "templateHash": "11600432622740004884"
+      "templateHash": "6315375074705186906"
     }
   },
   "parameters": {
@@ -209,7 +209,7 @@
               "resources": {
                 "requests": {
                   "cpu": 2,
-                  "memoryInGB": 8
+                  "memoryInGB": 4
                 }
               },
               "ports": [
