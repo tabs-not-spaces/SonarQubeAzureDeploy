@@ -4,8 +4,8 @@
   "metadata": {
     "_generator": {
       "name": "bicep",
-      "version": "0.26.170.59819",
-      "templateHash": "6315375074705186906"
+      "version": "0.36.177.2456",
+      "templateHash": "5232968384175734680"
     }
   },
   "parameters": {
@@ -66,6 +66,18 @@
       "type": "securestring",
       "metadata": {
         "description": "Database password for SonarQube"
+      }
+    },
+    "dockerHubUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Docker Hub username for container image authentication"
+      }
+    },
+    "dockerHubPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Docker Hub password for container image authentication"
       }
     }
   },
@@ -169,6 +181,13 @@
       "name": "[parameters('containerInstanceName')]",
       "location": "[parameters('location')]",
       "properties": {
+        "imageRegistryCredentials": [
+          {
+            "server": "docker.io",
+            "username": "[parameters('dockerHubUsername')]",
+            "password": "[parameters('dockerHubPassword')]"
+          }
+        ],
         "containers": [
           {
             "name": "sonarqube-container",

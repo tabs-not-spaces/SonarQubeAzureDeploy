@@ -25,6 +25,13 @@ param sqlServerAdminLogin string = 'sonar'
 @secure()
 param sqlServerAdminPassword string
 
+@description('Docker Hub username for container image authentication')
+param dockerHubUsername string
+
+@description('Docker Hub password for container image authentication')
+@secure()
+param dockerHubPassword string
+
 resource sonarqubeStorageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: storageAccountName
   location: location
@@ -109,6 +116,13 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2023-05
   name: containerInstanceName
   location: location
   properties: {
+    imageRegistryCredentials: [
+      {
+        server: 'docker.io'
+        username: dockerHubUsername
+        password: dockerHubPassword
+      }
+    ]
     containers: [
       {
         name: 'sonarqube-container'
