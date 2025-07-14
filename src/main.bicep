@@ -127,7 +127,7 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2023-05
       {
         name: 'sonarqube-container'
         properties: {
-          image: 'sonarqube:latest'
+          image: 'docker.io/library/sonarqube'
           environmentVariables: [
             {
               name: 'SONAR_JDBC_PASSWORD'
