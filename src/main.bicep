@@ -127,7 +127,7 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2023-05
       {
         name: 'sonarqube-container'
         properties: {
-          image: 'docker.io/library/sonarqube'
+          image: 'docker.io/library/sonarqube:latest'
           environmentVariables: [
             {
               name: 'SONAR_JDBC_PASSWORD'
@@ -177,7 +177,7 @@ resource sonarqubeContainer 'Microsoft.ContainerInstance/containerGroups@2023-05
       {
         name: 'caddy-container'
         properties: {
-          image: 'caddy:latest'
+          image: 'docker.io/library/caddy:latest'
           volumeMounts: [
             {
               name: 'caddy-data'
